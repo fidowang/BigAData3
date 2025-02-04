@@ -1,9 +1,10 @@
 import csv
 import json
+from xmlrpc.client import boolean
 import pandas as pd
 
 from datetime import datetime
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
 from bs4 import BeautifulSoup
 
 import pywencai
@@ -352,39 +353,42 @@ class THSData(object):
         # print(tmp_list)
         return limitUpDetail.shape[0], limitUpDetail
 
-    def profitLossEffectInfo(self) -> Tuple[int, int, int, int, int, int]:
+    def profitLossEffectInfo(self) -> None:
         print('开始获取问财情绪数据')
 
-        countPriceLimmit, priceLimmit = self.getWencaiData('今日涨停，剔除st')
+        countPriceLimmit, tmpDataFrame = self.getWencaiData('今日涨停，剔除st', False)
         # 涨停
-        countfirstLimmit, firstLimmit = self.getWencaiData('今日连板数=1，剔除st')
+        countfirstLimmit, tmpDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
         # 首板
-        countFailBoard, failboard = self.getWencaiData('今日炸板，剔除st')
+        countFailBoard, failboard = self.getWencaiData('今日炸板，剔除st', True)
         print(failboard)
         # 炸板
-        countStopBoard, stopboard = self.getWencaiData('今日断板，剔除st')
+        countStopBoard, stopboard = self.getWencaiData('今日断板，剔除st', True)
         # 断板
-        countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st')
+        countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
-        countallDayDownLimmit, allDayDownLimmit = self.getWencaiData('今日一字跌停板，剔除st')
+        countallDayDownLimmit, tmpDataFrame = self.getWencaiData('今日一字跌停板，剔除st', False)
         # 一字跌停
-        counteverDownLimmit, everDownLimmit = self.getWencaiData('今日曾触及跌停，剔除st')
+        counteverDownLimmit, tmpDataFrame = self.getWencaiData('今日曾触及跌停，剔除st', False)
         # 盘中跌停
-        countfuckDownBoard = counteverDownLimmit - counteverDownLimmit
+        countfuckDownBoard = counteverDownLimmit - countDownLimmit
         # 撬跌停板
+        counteverDownLimmit = self.getWencaiData('今日天地板，剔除st', False)
+        # 天地板
 
         print('情绪数据获取成功')
         print(f'{countPriceLimmit},{countfirstLimmit},{countFailBoard},{countDownLimmit},{countallDayDownLimmit},{countfuckDownBoard}')
-
-        return countPriceLimmit, countfirstLimmit, countFailBoard, countDownLimmit, countallDayDownLimmit, countfuckDownBoard
     
-    def getWencaiData(self, req: str) -> Tuple[int, object]:
+    def getWencaiData(self, req: str, detail: bool) -> Tuple[int, object]:
         reqData = pywencai.get(query=f'{req}', loop=True)
         countReqData = 0
         if reqData is not None:
             countReqData = reqData.shape[0]
         print(f'涨停数据获取完成，数量: {countReqData}')
-        return countReqData, reqData
+        if detail is True:
+            return countReqData, reqData
+        else:
+            return countReqData, None
 
 
     # def match_after_act(self):
