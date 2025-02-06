@@ -127,7 +127,6 @@ def getIndexInfo() -> Tuple[float, float]:
         amount_sh = float(board_infos_sh['成交额(亿)'])
         indexSH = float(board_infos_sh['指数涨幅'].strip('%'))
 
-
     response = requests.get(
         'https://q.10jqka.com.cn/zs/detail/code/399001/', cookies=cookies, headers=headers)
     if response.status_code == 200:
@@ -361,28 +360,38 @@ class THSData(object):
         countfirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
         # 首板
         countFailBoard, failBoard = self.getWencaiData('今日炸板，剔除st', True)
+        failBoard['最新涨跌幅'] = failBoard['最新涨跌幅'].astype(float)
+        meanFailBoard = failBoard['最新涨跌幅'].mean() / 100
         # 炸板
-        countStopBoard, stopBoard = self.getWencaiData('今日断板，剔除st', True)
-        # 断板
         countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
-        countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
+        countallDayDownLimmit, nullDataFrame = self.getWencaiData(
+            '今日的跌停类型是一字跌停，剔除st', False)
         # 一字跌停
         countConDownLimmit, nullDataFrame = self.getWencaiData('今日连续的跌停，剔除st', False)
         # 连续跌停
         countUpDownLimmit, nullDataFrame = self.getWencaiData('今日曾涨停，收盘跌停，剔除st', False)
         # 天地板
-        counteverDownLimmit, nullDataFrame = self.getWencaiData('今日曾跌停，剔除st', False)
-        # 盘中跌停
-        countfuckDownBoard = counteverDownLimmit - countDownLimmit
-        # 撬跌停板
-        countDownUpLimmit, nullDataFrame = self.getWencaiData('今日曾跌停，收盘涨停，剔除st', False)
+        countDownUpLimmit, nullDataFramxcwde = self.getWencaiData('今日曾跌停，收盘涨停，剔除st', False)
         # 地天板
+        nullCount, preUpLimmit = self.getWencaiData('昨日涨停，剔除st', True)
+        preUpLimmit['最新涨跌幅'] = preUpLimmit['最新涨跌幅'].astype(float)
+        meanPreUpLimmit = preUpLimmit['最新涨跌幅'].mean() / 100
+        # 昨日涨停表现
+        nullCount, preConUpLimmit = self.getWencaiData('昨日连续涨停天数>1，剔除st', True)
+        preConUpLimmit['最新涨跌幅'] = preConUpLimmit['最新涨跌幅'].astype(float)
+        meanPreConUpLimmit = preConUpLimmit['最新涨跌幅'].mean() / 100
+        # 昨日连板表现
+        nullCount, preFailBoard = self.getWencaiData('昨日炸板，剔除st', True)
+        preFailBoard['最新涨跌幅'] = preFailBoard['最新涨跌幅'].astype(float)
+        meanPreFailBoard = preFailBoard['最新涨跌幅'].mean() / 100
+        # 昨日炸板表现
 
         print('情绪数据获取成功')
-        print(f'涨停数{countPriceLimmit},首板数{countfirstLimmit},炸板数{countFailBoard},断板数{countStopBoard}'
-              f'跌停数{countDownLimmit},连续跌停数{countallDayDownLimmit},一字跌停数{countConDownLimmit}'
-              f'天地板数{countUpDownLimmit},撬地板数{countfuckDownBoard},地天板数{countDownUpLimmit}')
+        print(f'涨停数{countPriceLimmit}首板数{countfirstLimmit}炸板数{countFailBoard}'
+              f'跌停数{countDownLimmit}连续跌停数{countallDayDownLimmit}'
+              f'一字跌停数{countConDownLimmit}天地板数{countUpDownLimmit}地天板数{countDownUpLimmit}'
+              f'昨日涨停{meanPreUpLimmit}昨日连板{meanPreConUpLimmit}昨日炸板{meanPreFailBoard}')
 
     def getWencaiData(self, req: str, detail: bool) -> Tuple[int, pd.DataFrame]:
         reqData = pywencai.get(query=f'{req}', loop=True)
@@ -396,7 +405,6 @@ class THSData(object):
             return countReqData, reqData
         else:
             return countReqData, pd.DataFrame()
-
 
     # def match_after_act(self):
     #     print('正在读取同花顺隔日文件')
