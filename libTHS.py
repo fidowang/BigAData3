@@ -363,13 +363,12 @@ class THSData(object):
         countFailBoard, failBoard = self.getWencaiData('今日炸板，剔除st', True)
         # 炸板
         countStopBoard, stopBoard = self.getWencaiData('今日断板，剔除st', True)
-        print(stopBoard)
         # 断板
         countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
-        countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停', False)
+        countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
         # 一字跌停
-        countConDownLimmit, nullDataFrame = self.getWencaiData('今日连续跌停板，剔除st', False)
+        countConDownLimmit, nullDataFrame = self.getWencaiData('今日连续的跌停，剔除st', False)
         # 连续跌停
         countUpDownLimmit, nullDataFrame = self.getWencaiData('今日曾涨停，收盘跌停，剔除st', False)
         # 天地板
