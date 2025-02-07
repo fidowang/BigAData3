@@ -147,7 +147,7 @@ def getIndexInfo() -> Tuple[float, float]:
 
 class THSData(object):
     def __init__(self):
-        self.limit_up_map: Dict[str: str] = {
+        self.limit_up_map: Dict[str, str] = {
             '851983': '15天13板',
             '1310744': '24天20板',
             '1572891': '27天24板',
@@ -296,7 +296,7 @@ class THSData(object):
 
         return sum(zd_distribution[:31]), zd_distribution[31], sum(zd_distribution[32:])
 
-    def editLimitUpDetail(self) -> tuple[int, object]:
+    def editLimitUpDetail(self) -> tuple[int, str, object]:
         print('正在读取同花顺导出文件')
         with open('Table.xls', newline='') as file:
             csv_dat = csv.reader(file, delimiter='\t')
@@ -345,23 +345,26 @@ class THSData(object):
         limitUpDetail.sort_values(['涨停类型', '最终涨停时间'], ascending=[
                                            False, True], inplace=True)
         self.limit_up_stock_data = limitUpDetail
+        topRankIndex = limitUpDetail['涨停类型'].idxmax()
+        TopRankStock = limitUpDetail[topRankIndex, '名称']
 
         print('同花顺涨停股票数据处理完毕')
         print(limitUpDetail.to_string())
         # tmp_list = limitUpDetailDataFrame.values.tolist() # 将df转换成list用于版本2中
         # print(tmp_list)
-        return limitUpDetail.shape[0], limitUpDetail
+        return limitUpDetail.shape[0], TopRankStock, limitUpDetail
 
     def profitLossEffectInfo(self) -> None:
         print('开始获取问财情绪数据')
 
-        countPriceLimmit, nullDataFrame = self.getWencaiData('今日涨停，剔除st', False)
+        countPriceLimmit, priceLimmit = self.getWencaiData('今日涨停，剔除st', True)
+        topRanks = priceLimmit.iloc[:, 8].max()
         # 涨停
         countfirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
         # 首板
         countFailBoard, failBoard = self.getWencaiData('今日炸板，剔除st', True)
         failBoard['最新涨跌幅'] = failBoard['最新涨跌幅'].astype(float)
-        meanFailBoard = failBoard['最新涨跌幅'].mean() / 100
+        meanFailBoard = round(failBoard['最新涨跌幅'].mean() / 100, 2)
         # 炸板
         countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
@@ -376,15 +379,15 @@ class THSData(object):
         # 地天板
         nullCount, preUpLimmit = self.getWencaiData('昨日涨停，剔除st', True)
         preUpLimmit['最新涨跌幅'] = preUpLimmit['最新涨跌幅'].astype(float)
-        meanPreUpLimmit = preUpLimmit['最新涨跌幅'].mean() / 100
+        meanPreUpLimmit = round(preUpLimmit['最新涨跌幅'].mean() / 100, 2)
         # 昨日涨停表现
         nullCount, preConUpLimmit = self.getWencaiData('昨日连续涨停天数>1，剔除st', True)
         preConUpLimmit['最新涨跌幅'] = preConUpLimmit['最新涨跌幅'].astype(float)
-        meanPreConUpLimmit = preConUpLimmit['最新涨跌幅'].mean() / 100
+        meanPreConUpLimmit = round(preConUpLimmit['最新涨跌幅'].mean() / 100, 2)
         # 昨日连板表现
         nullCount, preFailBoard = self.getWencaiData('昨日炸板，剔除st', True)
         preFailBoard['最新涨跌幅'] = preFailBoard['最新涨跌幅'].astype(float)
-        meanPreFailBoard = preFailBoard['最新涨跌幅'].mean() / 100
+        meanPreFailBoard = round(preFailBoard['最新涨跌幅'].mean() / 100, 2)
         # 昨日炸板表现
 
         print('情绪数据获取成功')
