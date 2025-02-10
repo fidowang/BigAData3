@@ -75,7 +75,7 @@ class BaseData(object):
 
         self.today_xls_num = date_to_xls_num()
 
-        self.bigA_path = f'.\\bigAReview.xlsx'
+        self.bigA_path = '.\\bigAReview.xlsx'
 
         self.bigA_back = f'.\\review_backup\\bigAReview_{self.date_str}.xlsx'
 
@@ -109,6 +109,7 @@ class BaseData(object):
 
         self.count_dje: int = 0
         # 同花顺问财成交额大于15数
+        self.marketMooddata: list = []
 
     def ths_match_jy(self, thsdata: object, jydata: object) -> list:
         """
@@ -237,6 +238,19 @@ class BaseData(object):
         sheet_market.cell(row_to_wrt, 14).style = style_percent
         sheet_market.cell(row_to_wrt, 15).style = style_percent
         sheet_market.cell(row_to_wrt, 16).style = style_percent
+
+    def marketInfoWrite(self, book_review: object) -> None:
+        print('marketinfo_wrt 开始运行')
+        dateToWrite = date_to_xls_num()
+        marketInfoSheet = book_review['市场']
+        styleWeekdate: str = '日期周'
+        stylePercent: str = '百分比'
+        for row in marketInfoSheet.iter_rows(min_col=1, max_col=1):
+            # print(f'{row[0].value}')
+            if row[0].value == dateToWrite:
+                exit('检测到今日日期，请检查今日数据是否已写入')
+            else:
+                rowToWrite: int = row[0].row + 1
 
 
 if __name__ != '__main__':
