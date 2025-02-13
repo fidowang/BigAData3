@@ -80,11 +80,7 @@ class BaseData(object):
         self.bigA_back = f'.\\review_backup\\bigAReview_{self.date_str}.xlsx'
 
         # 以下一次为上涨数、平盘数、下跌数、涨停数、涨停股票列表、沪深两市成交额
-        self.up_counts: int = 0
-
-        self.zero_counts: int = 0
-
-        self.down_counts: int = 0
+        self.redGreenCount: list = []
 
         self.zt_counts: int = 0
 
@@ -109,7 +105,7 @@ class BaseData(object):
 
         self.count_dje: int = 0
         # 同花顺问财成交额大于15数
-        self.marketMooddata: list = []
+        self.marketMoodData: list = []
 
     def ths_match_jy(self, thsdata: object, jydata: object) -> list:
         """
@@ -146,7 +142,8 @@ class BaseData(object):
         book_path.save(self.bigA_back)
         print('备份完成，开始写入数据')
 
-        self.marketinfo_wrt(book_path)
+        # self.marketinfo_wrt(book_path)
+        self.marketInfoWrite(book_path)
         self.limitup_wrt(book_path, self.zt_counts, self.stock_list)
 
         book_path.save(self.bigA_path)
@@ -242,6 +239,7 @@ class BaseData(object):
     def marketInfoWrite(self, book_review: object) -> None:
         print('marketinfo_wrt 开始运行')
         dateToWrite = date_to_xls_num()
+        self.marketMoodData.insert(0, dateToWrite)
         marketInfoSheet = book_review['市场']
         styleWeekdate: str = '日期周'
         stylePercent: str = '百分比'
@@ -251,7 +249,7 @@ class BaseData(object):
                 exit('检测到今日日期，请检查今日数据是否已写入')
             else:
                 rowToWrite: int = row[0].row + 1
-
+        marketInfoSheet.append(self.marketMoodData)
 
 if __name__ != '__main__':
     pass

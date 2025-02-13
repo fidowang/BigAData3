@@ -252,7 +252,7 @@ class THSData(object):
         return
 
     @property
-    def updown_count(self) -> Tuple[int, int, int]:
+    def updown_count(self) -> list:
         print('get_updown_count 开始运行')
         cookies = {
             'XSRF-TOKEN': 'eyJpdiI6ImY3T1dOTFd4TmJvVEpuWEZJRnJPSVE9PSIsInZhbHVlIjoiMlozaW1OYlU2Znd3Y0xJdkgrZXJzV3lFazZpWjdDWlZaYWxBOXJBbk9aRjdqQm5lSUllZkhhOUNIbXloeHF5Ym1TTlBOc2pIKzVQckxJUEswR3FjeVE9PSIsIm1hYyI6ImQ3M2FkZmM4NjA4Y2E2ZTI1ZjA2ZWI2Y2I5MWY2ZmVjNGZlNDIxYmE4ZDA3ZjQ5ODE2NjgzZjJmNjY4MjdlOWYifQ%3D%3D',
@@ -294,7 +294,7 @@ class THSData(object):
         print(f'上涨:{sum(zd_distribution[:31])} 平盘:{
               zd_distribution[31]} 下跌:{sum(zd_distribution[32:])}\n')
 
-        return sum(zd_distribution[:31]), zd_distribution[31], sum(zd_distribution[32:])
+        return [sum(zd_distribution[:31]), zd_distribution[31], sum(zd_distribution[32:])]
 
     def editLimitUpDetail(self) -> tuple[int, object]:
         print('正在读取同花顺导出文件')
@@ -315,35 +315,22 @@ class THSData(object):
         limitUpDetail['名称'] = limitUpDetail['名称'].str.replace(
             ' ', '', regex=True)
         # limitUpDetailDataFrame['几天几板'] = limitUpDetailDataFrame['几天几板'].map(self.limit_up_map)
-        limitUpDetail['几天几板'] = limitUpDetail['几天几板'].apply(
-            marketRankCalc)
+        limitUpDetail['几天几板'] = limitUpDetail['几天几板'].apply(marketRankCalc)
         limitUpDetail['涨停类型'] = limitUpDetail['涨停类型'].str.replace(
             r'[手字板]', '', regex=True)  # 这里的数据还是涨停类型
-        limitUpDetail['几天几板'] = limitUpDetail['几天几板'] + \
-            limitUpDetail['涨停类型']
-        limitUpDetail['涨停类型'] = limitUpDetail['连续涨停天数'].astype(
-            int)
-        limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace(
-            '%', '')
-        limitUpDetail['现价'] = limitUpDetail['现价'].astype(
-            float)
+        limitUpDetail['几天几板'] = limitUpDetail['几天几板'] + limitUpDetail['涨停类型']
+        limitUpDetail['涨停类型'] = limitUpDetail['连续涨停天数'].astype(int)
+        limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '')
+        limitUpDetail['现价'] = limitUpDetail['现价'].astype(float)
         limitUpDetail['金额'] = limitUpDetail['金额'].astype(int)
-        limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(
-            int)
-        limitUpDetail['自由流值'] = limitUpDetail['自由流值'].str.replace(
-            '亿', '').astype(float) * 100000000
-        limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace(
-            '%', '').astype(float) / 100
-        limitUpDetail['开盘涨幅'] = limitUpDetail['开盘涨幅'].str.replace(
-            '%', '').astype(float) / 100
-        limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(
-            int)
-        limitUpDetail.drop(
-            columns='连续涨停天数', axis='columns', inplace=True)
-        limitUpDetail.drop(
-            columns='tmp', axis='columns', inplace=True)
-        limitUpDetail.sort_values(['涨停类型', '最终涨停时间'], ascending=[
-                                           False, True], inplace=True)
+        limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
+        limitUpDetail['自由流值'] = limitUpDetail['自由流值'].str.replace('亿', '').astype(float) * 100000000
+        limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '').astype(float) / 100
+        limitUpDetail['开盘涨幅'] = limitUpDetail['开盘涨幅'].str.replace('%', '').astype(float) / 100
+        limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
+        limitUpDetail.drop(columns='连续涨停天数', axis='columns', inplace=True)
+        limitUpDetail.drop(columns='tmp', axis='columns', inplace=True)
+        limitUpDetail.sort_values(['涨停类型', '最终涨停时间'], ascending=[False, True], inplace=True)
         self.limit_up_stock_data = limitUpDetail
 
         print('同花顺涨停股票数据处理完毕')
@@ -355,21 +342,24 @@ class THSData(object):
     def profitLossEffectInfo(self) -> list:
         print('开始获取问财情绪数据')
 
-        countPriceLimmit, priceLimmit = self.getWencaiData('今日涨停，剔除st', True)
-        priceLimmit.sort_values(priceLimmit.columns[8], ascending=False, inplace=True)
-        topRankStock = priceLimmit.iloc[0, 1]
-        topRank = priceLimmit.iloc[0, 8]
-        # 涨停
-        countFirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
+        countUpLimmit, upLimmit = self.getWencaiData('今日涨停，剔除st', True)
+        upLimmit.sort_values(upLimmit.columns[8], ascending=False, inplace=True)
+        topRankStock = upLimmit.iloc[0, 1]
+        topRank = upLimmit.iloc[0, 8]
+        # 涨停 最高板股票 最高板位
+        countFirstLimmit = (upLimmit.iloc[:, 8] == 1).sum()
+        # countFirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
         # 首板
-        countFailBoard, failBoard = self.getWencaiData('今日炸板，剔除st', True)
-        failBoard['最新涨跌幅'] = failBoard['最新涨跌幅'].astype(float)
-        meanFailBoard = round(failBoard['最新涨跌幅'].mean() / 100, 4)
+        countFailLimmit, failLimmit = self.getWencaiData('今日炸板，剔除st', True)
+        failLimmit['最新涨跌幅'] = failLimmit['最新涨跌幅'].astype(float)
+        meanFailLimmit = round(failLimmit['最新涨跌幅'].mean() / 100, 4)
         # 炸板
+        # 亏钱效应
+        countEverDownLimmit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
+        # 曾跌停
         countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
-        countallDayDownLimmit, nullDataFrame = self.getWencaiData(
-            '今日的跌停类型是一字跌停，剔除st', False)
+        countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
         # 一字跌停
         countConDownLimmit, nullDataFrame = self.getWencaiData('今日连续的跌停，剔除st', False)
         # 连续跌停
@@ -385,23 +375,20 @@ class THSData(object):
         preConUpLimmit['最新涨跌幅'] = preConUpLimmit['最新涨跌幅'].astype(float)
         meanPreConUpLimmit = round(preConUpLimmit['最新涨跌幅'].mean() / 100, 4)
         # 昨日连板表现
-        nullCount, preFailBoard = self.getWencaiData('昨日炸板，剔除st', True)
-        preFailBoard['最新涨跌幅'] = preFailBoard['最新涨跌幅'].astype(float)
-        meanPreFailBoard = round(preFailBoard['最新涨跌幅'].mean() / 100, 4)
+        nullCount, preFailLimmit = self.getWencaiData('昨日炸板，剔除st', True)
+        preFailLimmit['最新涨跌幅'] = preFailLimmit['最新涨跌幅'].astype(float)
+        meanPreFailLimmit = round(preFailLimmit['最新涨跌幅'].mean() / 100, 4)
         # 昨日炸板表现
 
         print('情绪数据获取成功')
-        print(f'涨停数{countPriceLimmit} 首板数{countFirstLimmit} 炸板数{countFailBoard} '
-              f'跌停数{countDownLimmit} 一字跌停数{countConDownLimmit} '
-              f'连续跌停数{countallDayDownLimmit} 天地板数{countUpDownLimmit} 地天板数{countDownUpLimmit} '
-              f'昨日涨停表现{meanPreUpLimmit} 昨日连板表现{meanPreConUpLimmit} 昨日炸板表现{meanPreFailBoard} '
-              f'最高板{topRankStock} 板位{topRank}')
-        
-        return [countPriceLimmit, countFirstLimmit, countFailBoard,
-                countDownLimmit, countallDayDownLimmit, countConDownLimmit,
-                countUpDownLimmit, countDownUpLimmit,
-                meanFailBoard, meanPreUpLimmit, meanPreConUpLimmit,
-                meanPreFailBoard, topRankStock, topRank]
+        print(f'涨停数{countUpLimmit} 首板数{countFirstLimmit} 板位{topRank} 炸板数{countFailLimmit} 曾跌停{countEverDownLimmit} '
+              f'跌停数{countDownLimmit} 一字跌停数{countConDownLimmit} 连续跌停数{countallDayDownLimmit} 天地板数{countUpDownLimmit} '
+              f'地天板数{countDownUpLimmit} 今日炸板表现{meanFailLimmit} 昨日涨停表现{meanPreUpLimmit} 昨日连板表现{meanPreConUpLimmit} '
+              f'昨日炸板表现{meanPreFailLimmit} 最高板{topRankStock}')
+
+        return [countUpLimmit, countFirstLimmit, topRank, countFailLimmit, countEverDownLimmit, countDownLimmit,
+                countallDayDownLimmit, countConDownLimmit, countUpDownLimmit, countDownUpLimmit, meanFailLimmit,
+                meanPreUpLimmit, meanPreConUpLimmit, meanPreFailLimmit, topRankStock]
 
     def getWencaiData(self, req: str, detail: bool) -> Tuple[int, pd.DataFrame]:
         reqData = pywencai.get(query=f'{req}', loop=True)
