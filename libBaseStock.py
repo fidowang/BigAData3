@@ -53,24 +53,6 @@ class BaseData(object):
             '竞价金额': 13
         }
 
-        self.title_market_map: Dict[str, int] = {
-            '日期': 0,
-            '成交量': 1,
-            '上涨数': 2,
-            '下跌数': 3,
-            '涨停数（不含st）': 4,
-            '首板数': 5,
-            '炸板数': 6,
-            '跌停数': 7,
-            '翘跌停': 8,
-            '高额交易数': 9,
-            '市场高标': 10,
-            '最高板位': 11,
-            '连板成功率': 12,
-            '连板率': 13,
-            '炸板率': 14
-        }
-
         self.date_str = date_str()
 
         self.dateToExcelQuery = date_to_xls_num()
@@ -105,14 +87,6 @@ class BaseData(object):
         compiledStocksData.drop(columns='briefReason', axis='columns', inplace=True)
 
         tmpResultData = compiledStocksData.values.tolist()
-        # title_row = self.title_row_map
-        # for x in ths_data:
-        #     for y in jy_data:
-        #         if x[title_row['名称']] == y['name']:
-        #             x[title_row['韭研原因']] = y['action_field_name']
-        #     if x[title_row['韭研原因']] == '':
-        #         print(f'{x[title_row['代码']]} {x[title_row['名称']]}匹配不到韭研异动个股')
-        #     # print(x)
         print('数据匹配完成')
         print(compiledStocksData.to_string())
         print('\n')

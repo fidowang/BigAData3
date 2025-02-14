@@ -93,20 +93,6 @@ def getIndexInfo() -> list:
 
 class THSData(object):
     def __init__(self):
-        self.title_row_map: Dict[str, int] = {
-            '日期': 0,
-            '代码': 1,
-            '名称': 2,
-            '几天几板': 3,
-            '涨停类型': 4,
-            '原因类别': 5,
-            '涨幅': 6,
-            '现价': 7,
-            '涨停时间': 8,
-            '金额': 9,
-            '流值': 10,
-            '韭研原因': 11  # 同花顺导出数据中该列为连续涨停，后变更为韭研原因
-        }
 
         self.today_xls_num = date_to_xls_num()
 
@@ -176,7 +162,6 @@ class THSData(object):
             r'^(4|8|9)', r'bj\1', regex=True)
         limitUpDetail['名称'] = limitUpDetail['名称'].str.replace(
             ' ', '', regex=True)
-        # limitUpDetailDataFrame['几天几板'] = limitUpDetailDataFrame['几天几板'].map(self.limit_up_map)
         limitUpDetail['几天几板'] = limitUpDetail['几天几板'].apply(marketRankCalc)
         limitUpDetail['涨停类型'] = limitUpDetail['涨停类型'].str.replace(
             r'[手字板]', '', regex=True)  # 这里的数据还是涨停类型
@@ -205,22 +190,21 @@ class THSData(object):
         print('开始获取问财情绪数据')
 
         # countUpLimmit, upLimmit = self.getWencaiData('今日涨停，剔除st', True)
-        countUpLimmit, upLimmit = self.editLimitUpDetail()
         # upLimmit.sort_values(upLimmit.columns[8], ascending=False, inplace=True)
+        # countFirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
+        countUpLimmit, upLimmit = self.editLimitUpDetail()
         topRankStock = upLimmit.iloc[0]['名称']
         topRank = upLimmit.iloc[0]['连续涨停天数']
         # 涨停 最高板股票 最高板位
         countFirstLimmit = (upLimmit['连续涨停天数'] == 1).sum()
-        # countFirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
         # 首板
         countFailLimmit, failLimmit = self.getWencaiData('今日炸板，剔除st', True)
         failLimmit['最新涨跌幅'] = failLimmit['最新涨跌幅'].astype(float)
         meanFailLimmit = round(failLimmit['最新涨跌幅'].mean() / 100, 4)
         # 炸板
-        # 亏钱效应
         countEverDownLimmit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
         # 曾跌停
-        countDownLimmit, downLimmit = self.getWencaiData('今日跌停板，剔除st', True)
+        countDownLimmit, nullDataFrame = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
         countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
         # 一字跌停
