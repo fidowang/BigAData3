@@ -1,10 +1,9 @@
 import csv
 import json
-from xmlrpc.client import boolean
 import pandas as pd
 
 from datetime import datetime
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple
 from bs4 import BeautifulSoup
 
 import pywencai
@@ -20,58 +19,6 @@ def date_to_xls_num(date=datetime.today().date()) -> int:
     return (dt1 - datetime(1900, 1, 1).date()).days + 2
 
 
-def qingxushuju() -> Tuple[int, int, int, int, int, int]:
-    print('开始获取问财情绪数据')
-
-    zhangting = pywencai.get(query='今日涨停，剔除st', loop=True, sleep=3)
-    if zhangting is not None:
-        zhangtings = zhangting.shape[0]
-    else:
-        zhangtings = 0
-    print(f'涨停数据获取完成，数量: {zhangtings}')
-
-    shouban = pywencai.get(query='今日连板数=1，剔除st', loop=True, sleep=3)
-    if shouban is not None:
-        shoubans = shouban.shape[0]
-    else:
-        shoubans = 0
-    print(f'首板数据获取完成，数量: {shoubans}')
-
-    zhaban = pywencai.get(query='今日炸板，剔除st', loop=True, sleep=3)
-    if zhaban is not None:
-        zhabans = zhaban.shape[0]
-    else:
-        zhabans = 0
-    print(f'炸板数据获取完成，数量: {zhabans}')
-
-    dieting = pywencai.get(query='今日跌停板，剔除st', loop=True, sleep=3)
-    if dieting is not None:
-        dietings = dieting.shape[0]
-    else:
-        dietings = 0
-    print(f'跌停数据获取完成，数量: {dietings}')
-
-    cengdieting = pywencai.get(query='今日曾触及跌停，剔除st', loop=True, sleep=3)
-    if cengdieting is not None:
-        cengdietings = cengdieting.shape[0]
-    else:
-        cengdietings = 0
-    qiaobans = cengdietings - dietings
-    print(f'撬板数据获取完成，数量: {qiaobans}')
-
-    dajine = pywencai.get(query='今日成交额大于15亿', loop=True, sleep=3)
-    if dajine is not None:
-        dajines = dajine.shape[0]
-    else:
-        dajines = 0
-    print(f'大成交额数据获取完成，数量: {dajines}')
-
-    print('情绪数据获取成功')
-    print(f'{zhangtings},{shoubans},{zhabans},{dietings},{qiaobans},{dajines}')
-
-    return zhangtings, shoubans, zhabans, dietings, qiaobans, dajines
-
-
 def marketRankCalc(rankcode: str) -> str:
     a, b = divmod(int(rankcode), 65537)
     ranks = f'{a + b}天{a}板'
@@ -82,7 +29,7 @@ def marketRankCalc(rankcode: str) -> str:
     return ranks
 
 
-def getIndexInfo() -> Tuple[float, float]:
+def getIndexInfo() -> list:
     cookies = {
         'Hm_lvt_929f8b362150b1f77b477230541dbbc2': '1730125965,1730204112',
         'Hm_lvt_78c58f01938e4d85eaf619eae71b4ed1': '1730125965,1730204112',
@@ -125,7 +72,7 @@ def getIndexInfo() -> Tuple[float, float]:
                 value = dl.find('dd').get_text(strip=True)
                 board_infos_sh[key] = value
         amount_sh = float(board_infos_sh['成交额(亿)'])
-        indexSH = float(board_infos_sh['指数涨幅'].strip('%'))
+        indexSH = float(board_infos_sh['指数涨幅'].strip('%')) / 100
 
     response = requests.get(
         'https://q.10jqka.com.cn/zs/detail/code/399001/', cookies=cookies, headers=headers)
@@ -140,96 +87,12 @@ def getIndexInfo() -> Tuple[float, float]:
                 board_infos_sz[key] = value
         amount_sz: float = float(board_infos_sz['成交额(亿)'])
 
-    print(f'沪市成交额：{amount_sh} 深市成交额：{
-          amount_sz} 两市总和：{amount_sh + amount_sz}')
-    return amount_sh + amount_sz, indexSH
+    print(f'沪市成交额：{amount_sh} 深市成交额：{amount_sz} 两市总和：{amount_sh + amount_sz}\n')
+    return [amount_sh + amount_sz, indexSH]
 
 
 class THSData(object):
     def __init__(self):
-        self.limit_up_map: Dict[str, str] = {
-            '851983': '15天13板',
-            '1310744': '24天20板',
-            '1572891': '27天24板',
-            '1245207': '23天19板',
-            '1441818': '26天22板',
-            '1507354': '26天23板',
-            '1179670': '22天18板',
-            '1114133': '21天17板',
-            '983060': '20天15板',
-            '1048596': '20天14板',
-            '1376279': '23天21板',
-            '983059': '19天15板',
-            '1310742': '22天20板',
-            '655371': '13天11板',
-            '917522': '18天14板',
-            '917520': '16天14板',
-            '851984': '16天13板',
-            '720909': '11天10板',
-            '1245205': '21天19板',
-            '983057': '17天15板',
-            '851985': '17天13板',
-            '917519': '15天14板',
-            '655375': '15天10板',
-            '917518': '14板',
-            '851982': '14天13板',
-            '786446': '14天12板',
-            '655374': '14天10板',
-            '589838': '14天9板',
-            '851981': '13板',
-            '786445': '13天12板',
-            '589837': '13天9板',
-            '524301': '13天8板',
-            '458765': '13天7板',
-            '786444': '12板',
-            '655372': '12天10板',
-            '589836': '12天9板',
-            '524300': '12天8板',
-            '458764': '12天7板',
-            '393228': '12天6板',
-            '720907': '11板',
-            '589835': '11天9板',
-            '524299': '11天8板',
-            '458763': '11天7板',
-            '393227': '11天6板',
-            '655370': '10板',
-            '589834': '10天9板',
-            '524298': '10天8板',
-            '458762': '10天7板',
-            '393226': '10天6板',
-            '327690': '10天5板',
-            '262154': '10天4板',
-            '589833': '9板',
-            '524297': '9天8板',
-            '458761': '9天7板',
-            '393225': '9天6板',
-            '327689': '9天5板',
-            '524296': '8板',
-            '458760': '8天7板',
-            '393224': '8天6板',
-            '327688': '8天5板',
-            '262152': '8天4板',
-            '458759': '7板',
-            '393223': '7天6板',
-            '327687': '7天5板',
-            '262151': '7天4板',
-            '196615': '7天3板',
-            '393222': '6板',
-            '327686': '6天5板',
-            '262150': '6天4板',
-            '196614': '6天3板',
-            '327685': '5板',
-            '262149': '5天4板',
-            '196613': '5天3板',
-            '262148': '4板',
-            '196612': '4天3板',
-            '131076': '4天2板',
-            '196611': '3板',
-            '131075': '3天2板',
-            '131074': '2板',
-            '65537': '首板'
-        }
-
         self.title_row_map: Dict[str, int] = {
             '日期': 0,
             '代码': 1,
@@ -291,12 +154,11 @@ class THSData(object):
                 exit('同花顺涨跌分布数据结构有变化')
         else:
             exit('同花顺涨跌分布数据获取错误')
-        print(f'上涨:{sum(zd_distribution[:31])} 平盘:{
-              zd_distribution[31]} 下跌:{sum(zd_distribution[32:])}\n')
+        print(f'上涨:{sum(zd_distribution[:31])} 平盘:{zd_distribution[31]} 下跌:{sum(zd_distribution[32:])}\n')
 
         return [sum(zd_distribution[:31]), zd_distribution[31], sum(zd_distribution[32:])]
 
-    def editLimitUpDetail(self) -> tuple[int, object]:
+    def editLimitUpDetail(self) -> tuple[int, pd.DataFrame]:
         print('正在读取同花顺导出文件')
         with open('Table.xls', newline='') as file:
             csv_dat = csv.reader(file, delimiter='\t')
@@ -328,9 +190,9 @@ class THSData(object):
         limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '').astype(float) / 100
         limitUpDetail['开盘涨幅'] = limitUpDetail['开盘涨幅'].str.replace('%', '').astype(float) / 100
         limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
-        limitUpDetail.drop(columns='连续涨停天数', axis='columns', inplace=True)
-        limitUpDetail.drop(columns='tmp', axis='columns', inplace=True)
-        limitUpDetail.sort_values(['涨停类型', '最终涨停时间'], ascending=[False, True], inplace=True)
+        limitUpDetail.drop(columns=['连续涨停天数', 'tmp'], axis='columns', inplace=True)
+        limitUpDetail.rename(columns={'涨停类型': '连续涨停天数'}, inplace=True)
+        limitUpDetail.sort_values(['连续涨停天数', '最终涨停时间'], ascending=[False, True], inplace=True)
         self.limit_up_stock_data = limitUpDetail
 
         print('同花顺涨停股票数据处理完毕')
@@ -342,12 +204,13 @@ class THSData(object):
     def profitLossEffectInfo(self) -> list:
         print('开始获取问财情绪数据')
 
-        countUpLimmit, upLimmit = self.getWencaiData('今日涨停，剔除st', True)
-        upLimmit.sort_values(upLimmit.columns[8], ascending=False, inplace=True)
-        topRankStock = upLimmit.iloc[0, 1]
-        topRank = upLimmit.iloc[0, 8]
+        # countUpLimmit, upLimmit = self.getWencaiData('今日涨停，剔除st', True)
+        countUpLimmit, upLimmit = self.editLimitUpDetail()
+        # upLimmit.sort_values(upLimmit.columns[8], ascending=False, inplace=True)
+        topRankStock = upLimmit.iloc[0]['名称']
+        topRank = upLimmit.iloc[0]['连续涨停天数']
         # 涨停 最高板股票 最高板位
-        countFirstLimmit = (upLimmit.iloc[:, 8] == 1).sum()
+        countFirstLimmit = (upLimmit['连续涨停天数'] == 1).sum()
         # countFirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
         # 首板
         countFailLimmit, failLimmit = self.getWencaiData('今日炸板，剔除st', True)
@@ -361,7 +224,7 @@ class THSData(object):
         # 跌停
         countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
         # 一字跌停
-        countConDownLimmit, nullDataFrame = self.getWencaiData('今日连续的跌停，剔除st', False)
+        countConDownLimmit, nullDataFrame = self.getWencaiData('昨日的跌停，今日的跌停，剔除st', False)
         # 连续跌停
         countUpDownLimmit, nullDataFrame = self.getWencaiData('今日曾涨停，收盘跌停，剔除st', False)
         # 天地板
@@ -381,13 +244,13 @@ class THSData(object):
         # 昨日炸板表现
 
         print('情绪数据获取成功')
-        print(f'涨停数{countUpLimmit} 首板数{countFirstLimmit} 板位{topRank} 炸板数{countFailLimmit} 曾跌停{countEverDownLimmit} '
-              f'跌停数{countDownLimmit} 一字跌停数{countConDownLimmit} 连续跌停数{countallDayDownLimmit} 天地板数{countUpDownLimmit} '
-              f'地天板数{countDownUpLimmit} 今日炸板表现{meanFailLimmit} 昨日涨停表现{meanPreUpLimmit} 昨日连板表现{meanPreConUpLimmit} '
+        print(f'涨停数{countUpLimmit} 首板数{countFirstLimmit} 板位{topRank} 炸板数{countFailLimmit} 今日炸板表现{meanFailLimmit} '
+              f'曾跌停{countEverDownLimmit} 跌停数{countDownLimmit} 一字跌停数{countConDownLimmit} 连续跌停数{countallDayDownLimmit} '
+              f'天地板数{countUpDownLimmit} 地天板数{countDownUpLimmit} 昨日涨停表现{meanPreUpLimmit} 昨日连板表现{meanPreConUpLimmit} '
               f'昨日炸板表现{meanPreFailLimmit} 最高板{topRankStock}')
 
-        return [countUpLimmit, countFirstLimmit, topRank, countFailLimmit, countEverDownLimmit, countDownLimmit,
-                countallDayDownLimmit, countConDownLimmit, countUpDownLimmit, countDownUpLimmit, meanFailLimmit,
+        return [countUpLimmit, countFirstLimmit, topRank, countFailLimmit, meanFailLimmit, countEverDownLimmit,
+                countDownLimmit, countallDayDownLimmit, countConDownLimmit, countUpDownLimmit, countDownUpLimmit,
                 meanPreUpLimmit, meanPreConUpLimmit, meanPreFailLimmit, topRankStock]
 
     def getWencaiData(self, req: str, detail: bool) -> Tuple[int, pd.DataFrame]:

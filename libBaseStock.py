@@ -73,39 +73,23 @@ class BaseData(object):
 
         self.date_str = date_str()
 
-        self.today_xls_num = date_to_xls_num()
+        self.dateToExcelQuery = date_to_xls_num()
 
         self.bigA_path = '.\\bigAReview.xlsx'
 
         self.bigA_back = f'.\\review_backup\\bigAReview_{self.date_str}.xlsx'
 
-        # 以下一次为上涨数、平盘数、下跌数、涨停数、涨停股票列表、沪深两市成交额
         self.redGreenCount: list = []
 
         self.zt_counts: int = 0
 
         self.stock_list: List[list] = []
 
-        self.hs_amount: int = 0
+        self.marketIndexInfo: List = []
 
-        self.count_zt: int = 0
-        # 同花顺问财涨停数
-
-        self.count_sb: int = 0
-        # 同花顺问财首板数
-
-        self.count_zb: int = 0
-        # 同花顺问财炸板数
-
-        self.count_dt: int = 0
-        # 同花顺问财跌停数
-
-        self.count_qb: int = 0
-        # 同花顺问财撬板数
-
-        self.count_dje: int = 0
-        # 同花顺问财成交额大于15数
         self.marketMoodData: list = []
+
+        self.marketDetialInfo: list = []
 
     def ths_match_jy(self, thsdata: object, jydata: object) -> list:
         """
@@ -131,6 +115,7 @@ class BaseData(object):
         #     # print(x)
         print('数据匹配完成')
         print(compiledStocksData.to_string())
+        print('\n')
         return tmpResultData
 
     def xls_edit(self) -> None:
@@ -200,56 +185,34 @@ class BaseData(object):
 
         print('涨停板表格数据已写入')
 
-    def marketinfo_wrt(self, book_review: object) -> None:
-        print('marketinfo_wrt 开始运行')
-        date_to_wrt = date_to_xls_num()
-        sheet_market = book_review['市场']
-        style_weekdate: str = '日期周'
-        style_percent: str = '百分比'
-
-        for row in sheet_market.iter_rows(min_col=1, max_col=1):
-            # print(f'{row[0].value}')
-            if row[0].value == date_to_wrt:
-                exit('检测到今日日期，请检查今日数据是否已写入')
-            else:
-                row_to_wrt: int = row[0].row + 1
-
-        sheet_market.cell(row_to_wrt, 1).value = date_to_wrt
-        sheet_market.cell(row_to_wrt, 1).style = style_weekdate
-        sheet_market.cell(row_to_wrt, 2).value = self.hs_amount
-        sheet_market.cell(row_to_wrt, 3).value = self.up_counts
-        sheet_market.cell(row_to_wrt, 4).value = self.zero_counts
-        sheet_market.cell(row_to_wrt, 5).value = self.down_counts
-        sheet_market.cell(row_to_wrt, 6).value = self.count_zt
-        sheet_market.cell(row_to_wrt, 7).value = self.count_sb
-        sheet_market.cell(row_to_wrt, 8).value = self.count_zb
-        sheet_market.cell(row_to_wrt, 9).value = self.count_dt
-        sheet_market.cell(row_to_wrt, 10).value = self.count_qb
-        sheet_market.cell(row_to_wrt, 11).value = self.count_dje
-
-        sheet_market.cell(row_to_wrt, 12).value = f'=VLOOKUP($A{row_to_wrt},涨停板!$A:$E,3,FALSE)'
-        sheet_market.cell(row_to_wrt, 13).value = f'=VLOOKUP($A{row_to_wrt},涨停板!$A:$E,5,FALSE)'
-        sheet_market.cell(row_to_wrt, 14).value = f'=(F{row_to_wrt}-G{row_to_wrt})/F{row_to_wrt - 1}'
-        sheet_market.cell(row_to_wrt, 15).value = f'=(F{row_to_wrt}-G{row_to_wrt})/F{row_to_wrt}'
-        sheet_market.cell(row_to_wrt, 16).value = f'=H{row_to_wrt}/(F{row_to_wrt}+H{row_to_wrt})'
-        sheet_market.cell(row_to_wrt, 14).style = style_percent
-        sheet_market.cell(row_to_wrt, 15).style = style_percent
-        sheet_market.cell(row_to_wrt, 16).style = style_percent
-
     def marketInfoWrite(self, book_review: object) -> None:
-        print('marketinfo_wrt 开始运行')
+        print('marketInfoWrite 开始运行')
         dateToWrite = date_to_xls_num()
-        self.marketMoodData.insert(0, dateToWrite)
         marketInfoSheet = book_review['市场']
         styleWeekdate: str = '日期周'
         stylePercent: str = '百分比'
+        rowToWrite: int = 0
         for row in marketInfoSheet.iter_rows(min_col=1, max_col=1):
             # print(f'{row[0].value}')
             if row[0].value == dateToWrite:
                 exit('检测到今日日期，请检查今日数据是否已写入')
             else:
-                rowToWrite: int = row[0].row + 1
-        marketInfoSheet.append(self.marketMoodData)
+                rowToWrite = row[0].row + 1
+        marketInfoSheet.append(self.marketDetialInfo)
+        marketInfoSheet.cell(rowToWrite, 1).style = styleWeekdate
+        marketInfoSheet.cell(rowToWrite, 22).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite - 1}'
+        marketInfoSheet.cell(rowToWrite, 23).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite}'
+        marketInfoSheet.cell(rowToWrite, 24).value = f'=J{rowToWrite}/(J{rowToWrite}+G{rowToWrite})'
+
+        marketInfoSheet.cell(rowToWrite, 3).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 11).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 18).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 19).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 20).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 22).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 23).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, 24).style = stylePercent
+
 
 if __name__ != '__main__':
     pass

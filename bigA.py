@@ -2,7 +2,7 @@ import libJiuYan
 import libTHS
 import libBaseStock
 
-from libTHS import qingxushuju, getIndexInfo
+from libTHS import getIndexInfo
 
 if __name__ != '__main__':
     pass
@@ -15,11 +15,12 @@ else:
     jy_act_field, jyStocks = JiuYan.act_to_json()
     # JiuYan.data_wrt()
 
-    bigA.hs_amount, bigA.indexSH = getIndexInfo()
-    bigA.redGreenCount = THS.updown_count
     bigA.zt_counts, bigA.thsStocks = THS.editLimitUpDetail()
     bigA.stock_list = bigA.ths_match_jy(thsdata=bigA.thsStocks, jydata=jyStocks)
-    # bigA.count_zt, bigA.count_sb, bigA.count_zb, bigA.count_dt, bigA.count_qb, bigA.count_dje = qingxushuju()
+
+    bigA.marketIndexInfo = getIndexInfo()
+    bigA.redGreenCount = THS.updown_count
     bigA.marketMoodData = THS.profitLossEffectInfo()
-    bigA.marketDetialInfo = [bigA.hs_amount, bigA.redGreenCount] + bigA.marketMoodData
+    bigA.marketDetialInfo = [bigA.dateToExcelQuery,] + bigA.marketIndexInfo + bigA.redGreenCount + bigA.marketMoodData
+    print(bigA.marketDetialInfo)
     bigA.xls_edit()
