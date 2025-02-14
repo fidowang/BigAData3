@@ -150,21 +150,17 @@ class THSData(object):
             csv_dat = csv.reader(file, delimiter='\t')
             ths_dat = [row for row in csv_dat if row]
         file.close()
-        dftitles = ['日期', '代码', '名称', '几天几板', '涨停类型', '原因类别', '首次涨停时间',
-                    '最终涨停时间', '现价', '金额', '竞价金额', '自由流值', '涨幅', '开盘涨幅', '连续涨停天数', 'tmp']
+        dftitles = ['日期', '代码', '名称', '几天几板', '涨停类型', '原因类别', '首次涨停时间', '最终涨停时间', '现价', '金额', '竞价金额', '自由流值', '涨幅',
+                    '开盘涨幅', '连续涨停天数', 'tmp']
         limitUpDetail = pd.DataFrame(ths_dat[1:], columns=dftitles)
 
         print('开始处理涨停详细数据')
-        limitUpDetail['日期'] = self.today_xls_num
-        limitUpDetail['代码'] = limitUpDetail['代码'].str.replace(
-            r'S[ZH]', lambda x: x.group().lower(), regex=True)
-        limitUpDetail['代码'] = limitUpDetail['代码'].str.replace(
-            r'^(4|8|9)', r'bj\1', regex=True)
-        limitUpDetail['名称'] = limitUpDetail['名称'].str.replace(
-            ' ', '', regex=True)
-        limitUpDetail['几天几板'] = limitUpDetail['几天几板'].apply(marketRankCalc)
-        limitUpDetail['涨停类型'] = limitUpDetail['涨停类型'].str.replace(
-            r'[手字板]', '', regex=True)  # 这里的数据还是涨停类型
+        limitUpDetail["日期"] = self.today_xls_num
+        limitUpDetail["代码"] = limitUpDetail["代码"].str.replace(r"S[ZH]", lambda x: x.group().lower(), regex=True)
+        limitUpDetail["代码"] = limitUpDetail["代码"].str.replace(r"^(4|8|9)", r"bj\1", regex=True)
+        limitUpDetail["名称"] = limitUpDetail["名称"].str.replace(" ", "", regex=True)
+        limitUpDetail["几天几板"] = limitUpDetail["几天几板"].apply(marketRankCalc)
+        limitUpDetail["涨停类型"] = limitUpDetail["涨停类型"].str.replace(r"[手字板]", "", regex=True)  # 这里的数据还是涨停类型
         limitUpDetail['几天几板'] = limitUpDetail['几天几板'] + limitUpDetail['涨停类型']
         limitUpDetail['涨停类型'] = limitUpDetail['连续涨停天数'].astype(int)
         limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '')
@@ -249,27 +245,6 @@ class THSData(object):
             return countReqData, reqData
         else:
             return countReqData, pd.DataFrame()
-
-    # def match_after_act(self):
-    #     print('正在读取同花顺隔日文件')
-    #     with open('af.xls', newline='') as file:
-    #         csv_dat = csv.reader(file, delimiter='\t')
-    #         af = [row for row in csv_dat if row]
-    #     file.close()
-    #
-    #     yst_data = self.limit_up_stock_data
-    #     after_data = pd.DataFrame(af[1:], columns=['代码', '名称', '开盘涨幅', '竞价金额', '涨幅', '金额', 'tmp'])
-    #     after_data.drop('代码', axis=1, inplace=True)
-    #     after_data.drop('tmp', axis=1, inplace=True)
-    #     after_data['开盘涨幅'] = after_data['开盘涨幅'].str.replace('%', '').astype(float) / 100
-    #     after_data['竞价金额'] = after_data['竞价金额'].astype(int)
-    #     after_data['涨幅'] = after_data['涨幅'].str.replace('%', '').astype(float) / 100
-    #     after_data['金额'] = after_data['金额'].astype(int)
-    #     print(after_data)
-    #
-    #     fin_df = pd.merge(yst_data, after_data, on='名称', how='left')
-    #     print(fin_df)
-    #     return 0
 
 
 if __name__ != '__main__':
