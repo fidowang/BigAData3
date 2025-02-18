@@ -153,6 +153,8 @@ class THSData(object):
         dftitles = ['日期', '代码', '名称', '几天几板', '涨停类型', '原因类别', '首次涨停时间', '最终涨停时间', '现价', '金额', '竞价金额', '自由流值', '涨幅',
                     '开盘涨幅', '连续涨停天数', 'tmp']
         limitUpDetail = pd.DataFrame(ths_dat[1:], columns=dftitles)
+        if (limitUpDetail['几天几板'] == '--').any() or (limitUpDetail['涨停类型'] == '--').any() or (limitUpDetail['原因类别'] == '--').any():
+            exit('几天几板、涨停类型或原因类别中存在“--”，请重新导出数据')
 
         print('开始处理涨停详细数据')
         limitUpDetail["日期"] = self.today_xls_num
@@ -185,53 +187,53 @@ class THSData(object):
     def profitLossEffectInfo(self) -> list:
         print('开始获取问财情绪数据')
 
-        # countUpLimmit, upLimmit = self.getWencaiData('今日涨停，剔除st', True)
-        # upLimmit.sort_values(upLimmit.columns[8], ascending=False, inplace=True)
-        # countFirstLimmit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
-        countUpLimmit, upLimmit = self.editLimitUpDetail()
-        topRankStock = upLimmit.iloc[0]['名称']
-        topRank = upLimmit.iloc[0]['连续涨停天数']
+        # countUplimit, uplimit = self.getWencaiData('今日涨停，剔除st', True)
+        # uplimit.sort_values(uplimit.columns[8], ascending=False, inplace=True)
+        # countFirstlimit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
+        countUplimit, uplimit = self.editLimitUpDetail()
+        topRankStock = uplimit.iloc[0]['名称']
+        topRank = uplimit.iloc[0]['连续涨停天数']
         # 涨停 最高板股票 最高板位
-        countFirstLimmit = (upLimmit['连续涨停天数'] == 1).sum()
+        countFirstlimit = (uplimit['连续涨停天数'] == 1).sum()
         # 首板
-        countFailLimmit, failLimmit = self.getWencaiData('今日炸板，剔除st', True)
-        failLimmit['最新涨跌幅'] = failLimmit['最新涨跌幅'].astype(float)
-        meanFailLimmit = round(failLimmit['最新涨跌幅'].mean() / 100, 4)
+        countFaillimit, faillimit = self.getWencaiData('今日炸板，剔除st', True)
+        faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
+        meanFaillimit = round(faillimit['最新涨跌幅'].mean() / 100, 4)
         # 炸板
-        countEverDownLimmit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
+        countEverDownlimit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
         # 曾跌停
-        countDownLimmit, nullDataFrame = self.getWencaiData('今日跌停板，剔除st', True)
+        countDownlimit, nullDataFrame = self.getWencaiData('今日跌停板，剔除st', True)
         # 跌停
-        countallDayDownLimmit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
+        countallDayDownlimit, nullDataFrame = self.getWencaiData('今日的跌停类型是一字跌停，剔除st', False)
         # 一字跌停
-        countConDownLimmit, nullDataFrame = self.getWencaiData('昨日的跌停，今日的跌停，剔除st', False)
+        countConDownlimit, nullDataFrame = self.getWencaiData('昨日的跌停，今日的跌停，剔除st', False)
         # 连续跌停
-        countUpDownLimmit, nullDataFrame = self.getWencaiData('今日曾涨停，收盘跌停，剔除st', False)
+        countUpDownlimit, nullDataFrame = self.getWencaiData('今日曾涨停，收盘跌停，剔除st', False)
         # 天地板
-        countDownUpLimmit, nullDataFramxcwde = self.getWencaiData('今日曾跌停，收盘涨停，剔除st', False)
+        countDownUplimit, nullDataFramxcwde = self.getWencaiData('今日曾跌停，收盘涨停，剔除st', False)
         # 地天板
-        nullCount, preUpLimmit = self.getWencaiData('昨日涨停，剔除st', True)
-        preUpLimmit['最新涨跌幅'] = preUpLimmit['最新涨跌幅'].astype(float)
-        meanPreUpLimmit = round(preUpLimmit['最新涨跌幅'].mean() / 100, 4)
+        nullCount, preUplimit = self.getWencaiData('昨日涨停，剔除st', True)
+        preUplimit['最新涨跌幅'] = preUplimit['最新涨跌幅'].astype(float)
+        meanPreUplimit = round(preUplimit['最新涨跌幅'].mean() / 100, 4)
         # 昨日涨停表现
-        nullCount, preConUpLimmit = self.getWencaiData('昨日连续涨停天数>1，剔除st', True)
-        preConUpLimmit['最新涨跌幅'] = preConUpLimmit['最新涨跌幅'].astype(float)
-        meanPreConUpLimmit = round(preConUpLimmit['最新涨跌幅'].mean() / 100, 4)
+        nullCount, preConUplimit = self.getWencaiData('昨日连续涨停天数>1，剔除st', True)
+        preConUplimit['最新涨跌幅'] = preConUplimit['最新涨跌幅'].astype(float)
+        meanPreConUplimit = round(preConUplimit['最新涨跌幅'].mean() / 100, 4)
         # 昨日连板表现
-        nullCount, preFailLimmit = self.getWencaiData('昨日炸板，剔除st', True)
-        preFailLimmit['最新涨跌幅'] = preFailLimmit['最新涨跌幅'].astype(float)
-        meanPreFailLimmit = round(preFailLimmit['最新涨跌幅'].mean() / 100, 4)
+        nullCount, preFaillimit = self.getWencaiData('昨日炸板，剔除st', True)
+        preFaillimit['最新涨跌幅'] = preFaillimit['最新涨跌幅'].astype(float)
+        meanPreFaillimit = round(preFaillimit['最新涨跌幅'].mean() / 100, 4)
         # 昨日炸板表现
 
         print('情绪数据获取成功')
-        print(f'涨停数{countUpLimmit} 首板数{countFirstLimmit} 板位{topRank} 炸板数{countFailLimmit} 今日炸板表现{meanFailLimmit} '
-              f'曾跌停{countEverDownLimmit} 跌停数{countDownLimmit} 一字跌停数{countConDownLimmit} 连续跌停数{countallDayDownLimmit} '
-              f'天地板数{countUpDownLimmit} 地天板数{countDownUpLimmit} 昨日涨停表现{meanPreUpLimmit} 昨日连板表现{meanPreConUpLimmit} '
-              f'昨日炸板表现{meanPreFailLimmit} 最高板{topRankStock}')
+        print(f'涨停数{countUplimit} 首板数{countFirstlimit} 板位{topRank} 炸板数{countFaillimit} 今日炸板表现{meanFaillimit} '
+              f'曾跌停{countEverDownlimit} 跌停数{countDownlimit} 一字跌停数{countConDownlimit} 连续跌停数{countallDayDownlimit} '
+              f'天地板数{countUpDownlimit} 地天板数{countDownUplimit} 昨日涨停表现{meanPreUplimit} 昨日连板表现{meanPreConUplimit} '
+              f'昨日炸板表现{meanPreFaillimit} 最高板{topRankStock}')
 
-        return [countUpLimmit, countFirstLimmit, topRank, countFailLimmit, meanFailLimmit, countEverDownLimmit,
-                countDownLimmit, countallDayDownLimmit, countConDownLimmit, countUpDownLimmit, countDownUpLimmit,
-                meanPreUpLimmit, meanPreConUpLimmit, meanPreFailLimmit, topRankStock]
+        return [countUplimit, countFirstlimit, topRank, countFaillimit, meanFaillimit, countEverDownlimit,
+                countDownlimit, countallDayDownlimit, countConDownlimit, countUpDownlimit, countDownUplimit,
+                meanPreUplimit, meanPreConUplimit, meanPreFaillimit, topRankStock]
 
     def getWencaiData(self, req: str, detail: bool) -> Tuple[int, pd.DataFrame]:
         reqData = pywencai.get(query=f'{req}', loop=True)
