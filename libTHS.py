@@ -96,7 +96,8 @@ class THSData(object):
 
         self.today_xls_num = date_to_xls_num()
 
-        self.limit_up_stock_data: object = None
+        self.uplimit: object = None
+        self.countUpLimit: int = 0
 
         return
 
@@ -179,7 +180,8 @@ class THSData(object):
         limitUpDetail.drop(columns=['连续涨停天数', 'tmp'], axis='columns', inplace=True)
         limitUpDetail.rename(columns={'涨停类型': '连续涨停天数'}, inplace=True)
         limitUpDetail.sort_values(['连续涨停天数', '最终涨停时间'], ascending=[False, True], inplace=True)
-        self.limit_up_stock_data = limitUpDetail
+        self.uplimit = limitUpDetail
+        self.countUpLimit = limitUpDetail.shape[0]
 
         print('同花顺涨停股票数据处理完毕')
         print(limitUpDetail.to_string())
@@ -193,7 +195,9 @@ class THSData(object):
         # countUplimit, uplimit = self.getWencaiData('今日涨停，剔除st', True)
         # uplimit.sort_values(uplimit.columns[8], ascending=False, inplace=True)
         # countFirstlimit, nullDataFrame = self.getWencaiData('今日连板数=1，剔除st', False)
-        countUplimit, uplimit = self.editLimitUpDetail()
+
+        countUplimit = self.countUpLimit
+        uplimit = self.uplimit
         topRankStock = uplimit.iloc[0]['名称']
         topRank = uplimit.iloc[0]['连续涨停天数']
         # 涨停 最高板股票 最高板位
