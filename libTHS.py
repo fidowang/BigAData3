@@ -205,7 +205,7 @@ class THSData(object):
         # 首板
         countFaillimit, faillimit = self.getWencaiData('今日炸板，剔除st', True)
         faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
-        meanFaillimit = round(faillimit['最新涨跌幅'].mean() / 100, 4)
+        minFaillimit = round(faillimit['最新涨跌幅'].min() / 100, 4)
         # 炸板
         countEverDownlimit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
         # 曾跌停
@@ -229,18 +229,18 @@ class THSData(object):
         # 昨日连板表现
         nullCount, preFaillimit = self.getWencaiData('昨日炸板，剔除st', True)
         preFaillimit['最新涨跌幅'] = preFaillimit['最新涨跌幅'].astype(float)
-        meanPreFaillimit = round(preFaillimit['最新涨跌幅'].mean() / 100, 4)
+        minPreFaillimit = round(preFaillimit['最新涨跌幅'].min() / 100, 4)
         # 昨日炸板表现
 
         print('情绪数据获取成功')
-        print(f'涨停数{countUplimit} 首板数{countFirstlimit} 板位{topRank} 炸板数{countFaillimit} 今日炸板表现{meanFaillimit} '
+        print(f'涨停数{countUplimit} 首板数{countFirstlimit} 板位{topRank} 炸板数{countFaillimit} 今日炸板表现{minFaillimit} '
               f'曾跌停{countEverDownlimit} 跌停数{countDownlimit} 一字跌停数{countConDownlimit} 连续跌停数{countallDayDownlimit} '
               f'天地板数{countUpDownlimit} 地天板数{countDownUplimit} 昨日涨停表现{meanPreUplimit} 昨日连板表现{meanPreConUplimit} '
-              f'昨日炸板表现{meanPreFaillimit} 最高板{topRankStock}')
+              f'昨日炸板表现{minPreFaillimit} 最高板{topRankStock}')
 
-        return [countUplimit, countFirstlimit, topRank, countFaillimit, meanFaillimit, countEverDownlimit,
+        return [countUplimit, countFirstlimit, topRank, countFaillimit, minFaillimit, countEverDownlimit,
                 countDownlimit, countallDayDownlimit, countConDownlimit, countUpDownlimit, countDownUplimit,
-                meanPreUplimit, meanPreConUplimit, meanPreFaillimit, topRankStock]
+                meanPreUplimit, meanPreConUplimit, minPreFaillimit, topRankStock]
 
     def getWencaiData(self, req: str, detail: bool) -> Tuple[int, pd.DataFrame]:
         reqData = pywencai.get(query=f'{req}', loop=True)
@@ -260,4 +260,5 @@ if __name__ != '__main__':
     pass
 else:
     a = THSData()
-    a.profitLossEffectInfo()
+    b, c = a.getWencaiData('今日的非涨停，昨日收盘涨停，剔除ST', True)
+    print(c)
