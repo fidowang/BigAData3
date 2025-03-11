@@ -207,6 +207,10 @@ class THSData(object):
         faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
         minFaillimit = round(faillimit['最新涨跌幅'].min() / 100, 4)
         # 炸板
+        countBoardsTermination, boardsTermination = self.getWencaiData('今日炸板，剔除st', True)
+        boardsTermination['最新涨跌幅'] = boardsTermination['最新涨跌幅'].astype(float)
+        minBoardsTermination = round(boardsTermination['最新涨跌幅'].min() / 100, 4)
+        # 断板
         countEverDownlimit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
         # 曾跌停
         countDownlimit, nullDataFrame = self.getWencaiData('今日跌停板，剔除st', True)
@@ -234,8 +238,9 @@ class THSData(object):
 
         print('情绪数据获取成功')
         print(f'涨停数{countUplimit} 首板数{countFirstlimit} 板位{topRank} 炸板数{countFaillimit} 今日炸板表现{minFaillimit} '
-              f'曾跌停{countEverDownlimit} 跌停数{countDownlimit} 一字跌停数{countConDownlimit} 连续跌停数{countallDayDownlimit} '
-              f'天地板数{countUpDownlimit} 地天板数{countDownUplimit} 昨日涨停表现{meanPreUplimit} 昨日连板表现{meanPreConUplimit} '
+              f'断板数{countBoardsTermination} 今日断板表现{minBoardsTermination} 曾跌停{countEverDownlimit} 跌停数{countDownlimit} '
+              f'跌停数{countDownlimit} 一字跌停数{countConDownlimit} 连续跌停数{countallDayDownlimit} 天地板数{countUpDownlimit} '
+              f'地天板数{countDownUplimit} 昨日涨停表现{meanPreUplimit} 昨日连板表现{meanPreConUplimit} '
               f'昨日炸板表现{minPreFaillimit} 最高板{topRankStock}')
 
         return [countUplimit, countFirstlimit, topRank, countFaillimit, minFaillimit, countEverDownlimit,
