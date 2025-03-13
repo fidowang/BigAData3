@@ -207,7 +207,7 @@ class THSData(object):
         faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
         minFaillimit = round(faillimit['最新涨跌幅'].min() / 100, 4)
         # 炸板
-        countBoardsTermination, boardsTermination = self.getWencaiData('今日炸板，剔除st', True)
+        countBoardsTermination, boardsTermination = self.getWencaiData('今日断板，剔除ST，剔除ST', True)
         boardsTermination['最新涨跌幅'] = boardsTermination['最新涨跌幅'].astype(float)
         minBoardsTermination = round(boardsTermination['最新涨跌幅'].min() / 100, 4)
         # 断板
@@ -265,5 +265,5 @@ if __name__ != '__main__':
     pass
 else:
     a = THSData()
-    b, c = a.getWencaiData('今日的非涨停，昨日收盘涨停，剔除ST', True)
+    b, c = a.getWencaiData('今日断板，剔除ST', True)
     print(c)
