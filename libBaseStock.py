@@ -82,8 +82,10 @@ class BaseData(object):
         """
         print('开始匹配同花顺和韭研公社涨停股数据')
         compiledStocksData = pd.merge(thsdata, jydata[['code', 'fieldName', 'briefReason']], left_on='代码', right_on='code', how='left')
-        compiledStocksData['原因类别'] = compiledStocksData['原因类别'] + '||' + compiledStocksData['briefReason'].apply(lambda x: '+'.join(x) if isinstance(x, list) else str(x))
+        compiledStocksData['所属概念'] = compiledStocksData['所属概念'] + '||' + compiledStocksData['briefReason'].apply(lambda x: '+'.join(x) if isinstance(x, list) else str(x))
+        # compiledStocksData['涨停原因类别'] = compiledStocksData['涨停原因类别'] + '||' + compiledStocksData['fieldName']
         compiledStocksData.drop(columns='code', axis='columns', inplace=True)
+        # compiledStocksData.drop(columns='fieldName', axis='columns', inplace=True)
         compiledStocksData.drop(columns='briefReason', axis='columns', inplace=True)
 
         tmpResultData = compiledStocksData.values.tolist()
@@ -155,7 +157,7 @@ class BaseData(object):
                         sheet_limituplist.cell(irow + 2, icol + 1).style = style_percent
                     case 13:
                         sheet_limituplist.cell(irow + 2, icol + 1).style = style_percent
-        # 日期0 代码1 名称2 几天几板3 连续涨停天数4 原因类别5 首次涨停时间6 最终涨停时间7 现价8 金额9 竞价金额10 自由流值11 涨幅12 开盘涨幅13 韭研异动板块14 异动解析15
+        # 日期0 代码1 名称2 几天几板3 连续涨停天数4 所属概念5 首次涨停时间6 最终涨停时间7 现价8 金额9 竞价金额10 自由流值11 涨幅12 开盘涨幅13 同花顺涨停原因类别14 韭研异动板块15
 
         print('涨停板表格数据已写入')
 

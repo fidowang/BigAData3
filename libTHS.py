@@ -151,10 +151,10 @@ class THSData(object):
             csv_dat = csv.reader(file, delimiter='\t')
             ths_dat = [row for row in csv_dat if row]
         file.close()
-        dftitles = ['日期', '代码', '名称', '几天几板', '涨停类型', '原因类别', '首次涨停时间', '最终涨停时间', '现价', '金额', '竞价金额', '自由流值', '涨幅',
-                    '开盘涨幅', '连续涨停天数', 'tmp']
+        dftitles = ['日期', '代码', '名称', '几天几板', '涨停类型', '所属概念', '首次涨停时间', '最终涨停时间', '现价', '金额', '竞价金额', '自由流值', '涨幅',
+                    '开盘涨幅', '连续涨停天数', '涨停原因类别', 'tmp']
         limitUpDetail = pd.DataFrame(ths_dat[1:], columns=dftitles)
-        if (limitUpDetail['几天几板'] == '--').any() or (limitUpDetail['涨停类型'] == '--').any():
+        if (limitUpDetail['几天几板'] == '--').any() or (limitUpDetail['涨停类型'] == '--').any() or (limitUpDetail['涨停原因类别'] == '--').any():
             exit('几天几板、涨停类型存在“--”，请重新导出数据')
 
         print('开始处理涨停详细数据')
@@ -166,9 +166,9 @@ class THSData(object):
         limitUpDetail["涨停类型"] = limitUpDetail["涨停类型"].str.replace(r"[手字板]", "", regex=True)  # 这里的数据还是涨停类型
         limitUpDetail['几天几板'] = limitUpDetail['几天几板'] + limitUpDetail['涨停类型']
         limitUpDetail['涨停类型'] = limitUpDetail['连续涨停天数'].astype(int)
-        limitUpDetail['原因类别'] = limitUpDetail['原因类别'].str.replace('【', '')
-        limitUpDetail['原因类别'] = limitUpDetail['原因类别'].str.replace('】', '')
-        limitUpDetail['原因类别'] = limitUpDetail['原因类别'].str.replace(';', '+')
+        limitUpDetail['所属概念'] = limitUpDetail['所属概念'].str.replace('【', '')
+        limitUpDetail['所属概念'] = limitUpDetail['所属概念'].str.replace('】', '')
+        limitUpDetail['所属概念'] = limitUpDetail['所属概念'].str.replace(';', '+')
         limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '')
         limitUpDetail['现价'] = limitUpDetail['现价'].astype(float)
         limitUpDetail['金额'] = limitUpDetail['金额'].astype(int)
@@ -267,3 +267,4 @@ else:
     a = THSData()
     b, c = a.getWencaiData('今日断板，剔除ST', True)
     print(c)
+    b, c = a.editLimitUpDetail()
