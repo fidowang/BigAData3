@@ -105,7 +105,7 @@ class BaseData(object):
 
         # self.marketinfo_wrt(book_path)
         self.marketInfoWrite(book_path)
-        self.limitup_wrt(book_path, self.zt_counts, self.stock_list)
+        # self.limitup_wrt(book_path, self.zt_counts, self.stock_list)
 
         book_path.save(self.bigA_path)
         # book_path.save("new.xlsx")
@@ -157,12 +157,40 @@ class BaseData(object):
                         sheet_limituplist.cell(irow + 2, icol + 1).style = style_percent
                     case 13:
                         sheet_limituplist.cell(irow + 2, icol + 1).style = style_percent
-        # 日期0 代码1 名称2 几天几板3 连续涨停天数4 所属概念5 首次涨停时间6 最终涨停时间7 现价8 金额9 竞价金额10 自由流值11 涨幅12 开盘涨幅13 同花顺涨停原因类别14 韭研异动板块15
+        # '日期'0 代码1 名称2 几天几板3 连续涨停天数4 所属概念5 首次涨停时间6 最终涨停时间7 现价8 金额9 竞价金额10 自由流值11 涨幅12 开盘涨幅13 同花顺涨停原因类别14 韭研异动板块15
 
         print('涨停板表格数据已写入')
 
     def marketInfoWrite(self, book_review: object) -> None:
         print('marketInfoWrite 开始运行')
+        titleMap: Dict[str, int] = {
+            '日期': 1,
+            '成交量': 2,
+            '上证涨幅': 3,
+            '上涨数': 4,
+            '平盘数': 5,
+            '下跌数': 6,
+            '涨停数（不含st）': 7,
+            '首板数': 8,
+            '最高板位': 9,
+            '炸板数': 10,
+            '炸板表现': 11,
+            '断板数': 12,
+            '断板表现': 13,
+            '曾跌停数': 14,
+            '跌停数': 15,
+            '一字跌停数': 16,
+            '连续跌停数': 17,
+            '天地板数': 18,
+            '地天板数': 19,
+            '昨日涨停表现': 20,
+            '昨日连板表现': 21,
+            '昨日炸板表现': 22,
+            '市场高标': 23,
+            '连板成功率': 24,
+            '连板率': 25,
+            '封板率': 26,
+        }
         dateToWrite = date_to_xls_num()
         marketInfoSheet = book_review['市场']
         styleWeekdate: str = '日期周'
@@ -175,19 +203,20 @@ class BaseData(object):
             else:
                 rowToWrite = row[0].row + 1
         marketInfoSheet.append(self.marketDetialInfo)
-        marketInfoSheet.cell(rowToWrite, 1).style = styleWeekdate
-        marketInfoSheet.cell(rowToWrite, 22).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite - 1}'
-        marketInfoSheet.cell(rowToWrite, 23).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite}'
-        marketInfoSheet.cell(rowToWrite, 24).value = f'=J{rowToWrite}/(J{rowToWrite}+G{rowToWrite})'
+        marketInfoSheet.cell(rowToWrite, titleMap['日期']).style = styleWeekdate
+        marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite - 1}'
+        marketInfoSheet.cell(rowToWrite, titleMap['连板率']).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite}'
+        marketInfoSheet.cell(rowToWrite, titleMap['封板率']).value = f'=G{rowToWrite}/(J{rowToWrite}+G{rowToWrite})'
 
-        marketInfoSheet.cell(rowToWrite, 3).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 11).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 18).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 19).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 20).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 22).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 23).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, 24).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['上证涨幅']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['炸板表现']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['断板表现']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['昨日涨停表现']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['昨日连板表现']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['昨日炸板表现']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['连板率']).style = stylePercent
+        marketInfoSheet.cell(rowToWrite, titleMap['封板率']).style = stylePercent
 
 
 if __name__ != '__main__':

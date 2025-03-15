@@ -243,7 +243,7 @@ class THSData(object):
               f'地天板数{countDownUplimit} 昨日涨停表现{meanPreUplimit} 昨日连板表现{meanPreConUplimit} '
               f'昨日炸板表现{minPreFaillimit} 最高板{topRankStock}')
 
-        return [countUplimit, countFirstlimit, topRank, countFaillimit, minFaillimit, countEverDownlimit,
+        return [countUplimit, countFirstlimit, topRank, countFaillimit, minFaillimit, countBoardsTermination, minBoardsTermination, countEverDownlimit,
                 countDownlimit, countallDayDownlimit, countConDownlimit, countUpDownlimit, countDownUplimit,
                 meanPreUplimit, meanPreConUplimit, minPreFaillimit, topRankStock]
 
