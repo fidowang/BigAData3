@@ -105,7 +105,7 @@ class BaseData(object):
 
         # self.marketinfo_wrt(book_path)
         self.marketInfoWrite(book_path)
-        # self.limitup_wrt(book_path, self.zt_counts, self.stock_list)
+        self.limitup_wrt(book_path, self.zt_counts, self.stock_list)
 
         book_path.save(self.bigA_path)
         # book_path.save("new.xlsx")
