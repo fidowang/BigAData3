@@ -1,4 +1,5 @@
 import csv
+from itertools import count
 import json
 import pandas as pd
 
@@ -173,7 +174,7 @@ class THSData(object):
         limitUpDetail['现价'] = limitUpDetail['现价'].astype(float)
         limitUpDetail['金额'] = limitUpDetail['金额'].astype(int)
         limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
-        limitUpDetail['自由流值'] = limitUpDetail['自由流值'].str.replace('亿', '').astype(float) * 100000000
+        # limitUpDetail['自由流值'] = limitUpDetail['自由流值'].str.replace('亿', '').astype(float) * 100000000
         limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '').astype(float) / 100
         limitUpDetail['开盘涨幅'] = limitUpDetail['开盘涨幅'].str.replace('%', '').astype(float) / 100
         limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
@@ -203,6 +204,8 @@ class THSData(object):
         # 涨停 最高板股票 最高板位
         countFirstlimit = (uplimit['连续涨停天数'] == 1).sum()
         # 首板
+        countConUplimit = countUplimit - countFirstlimit
+        # 连续涨停数
         countFaillimit, faillimit = self.getWencaiData('今日炸板，剔除st', True)
         faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
         minFaillimit = round(faillimit['最新涨跌幅'].min() / 100, 4)
@@ -237,13 +240,13 @@ class THSData(object):
         # 昨日炸板表现
 
         print('情绪数据获取成功')
-        print(f'涨停数{countUplimit} 首板数{countFirstlimit} 板位{topRank} 炸板数{countFaillimit} 今日炸板表现{minFaillimit} '
+        print(f'涨停数{countUplimit} 连板数{countConUplimit} 首板数{countFirstlimit} 板位{topRank} 炸板数{countFaillimit} 今日炸板表现{minFaillimit} '
               f'断板数{countBoardsTermination} 今日断板表现{minBoardsTermination} 曾跌停{countEverDownlimit} 跌停数{countDownlimit} '
               f'跌停数{countDownlimit} 一字跌停数{countConDownlimit} 连续跌停数{countallDayDownlimit} 天地板数{countUpDownlimit} '
               f'地天板数{countDownUplimit} 昨日涨停表现{meanPreUplimit} 昨日连板表现{meanPreConUplimit} '
               f'昨日炸板表现{minPreFaillimit} 最高板{topRankStock}')
 
-        return [countUplimit, countFirstlimit, topRank, countFaillimit, minFaillimit, countBoardsTermination, minBoardsTermination, countEverDownlimit,
+        return [countUplimit, countConUplimit, countFirstlimit, topRank, countFaillimit, minFaillimit, countBoardsTermination, minBoardsTermination, countEverDownlimit,
                 countDownlimit, countallDayDownlimit, countConDownlimit, countUpDownlimit, countDownUplimit,
                 meanPreUplimit, meanPreConUplimit, minPreFaillimit, topRankStock]
 

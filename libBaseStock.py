@@ -171,24 +171,25 @@ class BaseData(object):
             '平盘数': 5,
             '下跌数': 6,
             '涨停数（不含st）': 7,
-            '首板数': 8,
-            '最高板位': 9,
-            '炸板数': 10,
-            '炸板表现': 11,
-            '断板数': 12,
-            '断板表现': 13,
-            '曾跌停数': 14,
-            '跌停数': 15,
-            '一字跌停数': 16,
-            '连续跌停数': 17,
-            '天地板数': 18,
-            '地天板数': 19,
-            '昨日涨停表现': 20,
-            '昨日连板表现': 21,
-            '昨日炸板表现': 22,
-            '市场高标': 23,
-            '连板成功率': 24,
-            '连板率': 25,
+            '连板数': 8,
+            '首板数': 9,
+            '最高板位': 10,
+            '炸板数': 11,
+            '炸板表现': 12,
+            '断板数': 13,
+            '断板表现': 14,
+            '曾跌停数': 15,
+            '跌停数': 16,
+            '一字跌停数': 17,
+            '连续跌停数': 18,
+            '天地板数': 19,
+            '地天板数': 20,
+            '昨日涨停表现': 21,
+            '昨日连板表现': 22,
+            '昨日炸板表现': 23,
+            '市场高标': 24,
+            '连板成功率': 25,
+            # '连板率': 25,
             '封板率': 26,
         }
         dateToWrite = date_to_xls_num()
@@ -204,9 +205,9 @@ class BaseData(object):
                 rowToWrite = row[0].row + 1
         marketInfoSheet.append(self.marketDetialInfo)
         marketInfoSheet.cell(rowToWrite, titleMap['日期']).style = styleWeekdate
-        marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite - 1}'
-        marketInfoSheet.cell(rowToWrite, titleMap['连板率']).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite}'
-        marketInfoSheet.cell(rowToWrite, titleMap['封板率']).value = f'=G{rowToWrite}/(J{rowToWrite}+G{rowToWrite})'
+        marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).value = f'=(G{rowToWrite}-J{rowToWrite})/G{rowToWrite - 1}'
+        # marketInfoSheet.cell(rowToWrite, titleMap['连板率']).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite}'
+        marketInfoSheet.cell(rowToWrite, titleMap['封板率']).value = f'=G{rowToWrite}/(K{rowToWrite}+G{rowToWrite})'
 
         marketInfoSheet.cell(rowToWrite, titleMap['上证涨幅']).style = stylePercent
         marketInfoSheet.cell(rowToWrite, titleMap['炸板表现']).style = stylePercent
@@ -215,7 +216,7 @@ class BaseData(object):
         marketInfoSheet.cell(rowToWrite, titleMap['昨日连板表现']).style = stylePercent
         marketInfoSheet.cell(rowToWrite, titleMap['昨日炸板表现']).style = stylePercent
         marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).style = stylePercent
-        marketInfoSheet.cell(rowToWrite, titleMap['连板率']).style = stylePercent
+        # marketInfoSheet.cell(rowToWrite, titleMap['连板率']).style = stylePercent
         marketInfoSheet.cell(rowToWrite, titleMap['封板率']).style = stylePercent
 
 
