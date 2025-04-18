@@ -175,6 +175,7 @@ class THSData(object):
         limitUpDetail['金额'] = limitUpDetail['金额'].astype(int)
         limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
         # limitUpDetail['自由流值'] = limitUpDetail['自由流值'].str.replace('亿', '').astype(float) * 100000000
+        limitUpDetail['自由流值'] = limitUpDetail['自由流值'].astype(int)
         limitUpDetail['涨幅'] = limitUpDetail['涨幅'].str.replace('%', '').astype(float) / 100
         limitUpDetail['开盘涨幅'] = limitUpDetail['开盘涨幅'].str.replace('%', '').astype(float) / 100
         limitUpDetail['竞价金额'] = limitUpDetail['竞价金额'].astype(int)
