@@ -1,6 +1,7 @@
 import csv
 from itertools import count
 import json
+from math import e
 import pandas as pd
 
 from datetime import datetime
@@ -208,12 +209,18 @@ class THSData(object):
         countConUplimit = countUplimit - countFirstlimit
         # 连续涨停数
         countFaillimit, faillimit = self.getWencaiData('今日炸板，剔除st', True)
-        faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
-        minFaillimit = round(faillimit['最新涨跌幅'].min() / 100, 4)
+        if countFaillimit > 0:
+            faillimit['最新涨跌幅'] = faillimit['最新涨跌幅'].astype(float)
+            minFaillimit = round(faillimit['最新涨跌幅'].min() / 100, 4)
+        else:
+            minFaillimit = 0.0
         # 炸板
         countBoardsTermination, boardsTermination = self.getWencaiData('昨日收盘涨停，今日非涨停，剔除北交所，剔除停牌，剔除S', True)
-        boardsTermination['最新涨跌幅'] = boardsTermination['最新涨跌幅'].astype(float)
-        minBoardsTermination = round(boardsTermination['最新涨跌幅'].min() / 100, 4)
+        if countBoardsTermination > 0:
+            boardsTermination['最新涨跌幅'] = boardsTermination['最新涨跌幅'].astype(float)
+            minBoardsTermination = round(boardsTermination['最新涨跌幅'].min() / 100, 4)
+        else:
+            minBoardsTermination = 0.0
         # 断板
         countEverDownlimit, nullDataFrame = self.getWencaiData('今日最低价=今日跌停价，剔除st', True)
         # 曾跌停
@@ -227,17 +234,26 @@ class THSData(object):
         # 天地板
         countDownUplimit, nullDataFramxcwde = self.getWencaiData('今日曾跌停，收盘涨停，剔除st', False)
         # 地天板
-        nullCount, preUplimit = self.getWencaiData('昨日涨停，剔除st', True)
-        preUplimit['最新涨跌幅'] = preUplimit['最新涨跌幅'].astype(float)
-        meanPreUplimit = round(preUplimit['最新涨跌幅'].mean() / 100, 4)
+        countPreUplimit, preUplimit = self.getWencaiData('昨日涨停，剔除st', True)
+        if countPreUplimit > 0:
+            preUplimit['最新涨跌幅'] = preUplimit['最新涨跌幅'].astype(float)
+            meanPreUplimit = round(preUplimit['最新涨跌幅'].mean() / 100, 4)
+        else:
+            meanPreUplimit = 0.0
         # 昨日涨停表现
-        nullCount, preConUplimit = self.getWencaiData('昨日连续涨停天数>1，剔除st', True)
-        preConUplimit['最新涨跌幅'] = preConUplimit['最新涨跌幅'].astype(float)
-        meanPreConUplimit = round(preConUplimit['最新涨跌幅'].mean() / 100, 4)
+        countPreConUplimit, preConUplimit = self.getWencaiData('昨日连续涨停天数>1，剔除st', True)
+        if countPreConUplimit > 0:
+            preConUplimit['最新涨跌幅'] = preConUplimit['最新涨跌幅'].astype(float)
+            meanPreConUplimit = round(preConUplimit['最新涨跌幅'].mean() / 100, 4)
+        else:
+            meanPreConUplimit = 0.0
         # 昨日连板表现
-        nullCount, preFaillimit = self.getWencaiData('昨日炸板，剔除st', True)
-        preFaillimit['最新涨跌幅'] = preFaillimit['最新涨跌幅'].astype(float)
-        minPreFaillimit = round(preFaillimit['最新涨跌幅'].min() / 100, 4)
+        countPreFaillimit, preFaillimit = self.getWencaiData('昨日炸板，剔除st', True)
+        if countPreFaillimit > 0:
+            preFaillimit['最新涨跌幅'] = preFaillimit['最新涨跌幅'].astype(float)
+            minPreFaillimit = round(preFaillimit['最新涨跌幅'].min() / 100, 4)
+        else:
+            minPreFaillimit = 0.0
         # 昨日炸板表现
 
         print('情绪数据获取成功')
@@ -269,6 +285,6 @@ if __name__ != '__main__':
     pass
 else:
     a = THSData()
-    b, c = a.getWencaiData('今日断板，剔除北交所，剔除停牌，剔除ST', True)
+    b, c = a.getWencaiData('今日炸板，剔除st', True)
     print(c)
-    b, c = a.editLimitUpDetail()
+
