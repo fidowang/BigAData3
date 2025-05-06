@@ -287,4 +287,6 @@ else:
     a = THSData()
     b, c = a.getWencaiData('今日炸板，剔除st', True)
     print(c)
+    reqData = pywencai.get(query='今日炸板，剔除st', loop=True)
+    print(reqData)
 
