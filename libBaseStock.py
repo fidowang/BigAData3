@@ -205,9 +205,9 @@ class BaseData(object):
                 rowToWrite = row[0].row + 1
         marketInfoSheet.append(self.marketDetialInfo)
         marketInfoSheet.cell(rowToWrite, titleMap['日期']).style = styleWeekdate
-        marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).value = f'=(G{rowToWrite}-J{rowToWrite})/G{rowToWrite - 1}'
+        marketInfoSheet.cell(rowToWrite, titleMap['连板成功率']).value = f'= H{rowToWrite}/G{rowToWrite - 1}'
         # marketInfoSheet.cell(rowToWrite, titleMap['连板率']).value = f'=(G{rowToWrite}-H{rowToWrite})/G{rowToWrite}'
-        marketInfoSheet.cell(rowToWrite, titleMap['封板率']).value = f'=G{rowToWrite}/(K{rowToWrite}+G{rowToWrite})'
+        marketInfoSheet.cell(rowToWrite, titleMap['封板率']).value = f'= G{rowToWrite}/(K{rowToWrite}+G{rowToWrite})'
 
         marketInfoSheet.cell(rowToWrite, titleMap['上证涨幅']).style = stylePercent
         marketInfoSheet.cell(rowToWrite, titleMap['炸板表现']).style = stylePercent
