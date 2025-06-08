@@ -284,9 +284,9 @@ class THSData(object):
 if __name__ != '__main__':
     pass
 else:
-    a = THSData()
-    b, c = a.getWencaiData('今日炸板，剔除st', True)
-    print(c)
-    reqData = pywencai.get(query='今日炸板，剔除st', loop=True)
-    print(reqData)
-
+    reqData = pywencai.get(query='20日涨幅大于等于55%，收盘价大于等于10日线，剔除st，剔除北交所', loop=True)
+    if reqData is not None and isinstance(reqData, pd.DataFrame):
+        print(f'获取到{reqData.shape[0]}条数据')
+        reqData.to_csv('test.csv', index=False, encoding='utf-8-sig')
+    else:
+        print('没有获取到数据或数据格式不正确')
